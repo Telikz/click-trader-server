@@ -1,5 +1,5 @@
 use spacetimedb::sats::u256;
-use spacetimedb::{reducer, table, Identity, ReducerContext, Table, TimeDuration, Timestamp};
+use spacetimedb::{reducer, table, Identity, ReducerContext, ScheduleAt, Table, TimeDuration, Timestamp};
 
 #[table(name = player, public)]
 pub struct Player {
@@ -32,9 +32,43 @@ pub struct Upgrades {
     auto_click_rate: Option<i64>,
 }
 
-#[reducer(init)]
-pub fn init(_ctx: &ReducerContext) {
+#[table(name = update_player_schedule, scheduled(update_players))]
+pub struct UpdatePlayersSchedule {
+    #[primary_key]
+    #[auto_inc]
+    id: u64,
+    scheduled_at: ScheduleAt,
+}
 
+#[reducer]
+pub fn update_players(ctx: &ReducerContext, _args: UpdatePlayersSchedule) -> Result<(), String> {
+    for mut player in ctx.db.player().iter() {
+        if player.online && player.passive_income > 0 {
+            player.money += u256::from(player.passive_income);
+            ctx.db.player().identity().update(player);
+        }
+    }
+
+    let one_second = TimeDuration::from_micros(1_000_000);
+    let future_timestamp: Timestamp = ctx.timestamp + one_second;
+
+    ctx.db.update_player_schedule().insert(UpdatePlayersSchedule {
+        id: 0,
+        scheduled_at: future_timestamp.into(),
+    });
+
+    Ok(())
+}
+
+#[reducer(init)]
+pub fn init(ctx: &ReducerContext) {
+    let one_second = TimeDuration::from_micros(1_000_000);
+    let future_timestamp: Timestamp = ctx.timestamp + one_second;
+
+    ctx.db.update_player_schedule().insert(UpdatePlayersSchedule {
+        id: 0,
+        scheduled_at: future_timestamp.into(),
+    });
 }
 
 #[reducer(client_connected)]
