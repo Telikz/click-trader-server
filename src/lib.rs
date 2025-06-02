@@ -10,9 +10,9 @@ pub struct Player {
     passive_income: u128,
     click_power: u64,
     click_timer: i64,
-    last_click: Timestamp,
     online: bool,
-    upgrades: Vec<u32>,
+    upgrades: Vec<u16>,
+    last_click: Timestamp,
 }
 
 #[table(name = upgrades, public)]
@@ -20,16 +20,15 @@ pub struct Upgrades {
     #[unique]
     #[auto_inc]
     #[primary_key]
-    id: u32,
-    identifier: String,
-    level: u32,
+    id: u16,
+    level: u8,
     cost: u128,
     title: String,
+    identifier: String,
     description: String,
     passive_income_bonus: Option<u64>,
     click_power_bonus: Option<u64>,
     click_timer_bonus: Option<i64>,
-    auto_click_rate: Option<i64>,
 }
 
 #[table(name = update_player_schedule, scheduled(update_players))]
@@ -138,7 +137,7 @@ pub fn set_name(ctx: &ReducerContext, username: String) -> Result<(), String> {
 }
 
 #[reducer]
-pub fn buy_upgrade(ctx: &ReducerContext, upgrade_id: u32) -> Result<(), String> {
+pub fn buy_upgrade(ctx: &ReducerContext, upgrade_id: u16) -> Result<(), String> {
     let Some(mut player) = ctx.db.player().identity().find(ctx.sender) else {
         return Err("Player not found".to_string());
     };
@@ -185,12 +184,11 @@ pub fn add_upgrade(
     identifier: String,
     title: String,
     description: String,
-    level: u32,
+    level: u8,
     cost: u128,
     passive_income_bonus: Option<u64>,
     click_power_bonus: Option<u64>,
     click_timer_bonus: Option<i64>,
-    auto_click_rate: Option<i64>,
 ) -> Result<(), String> {
     ctx.db.upgrades().insert(Upgrades {
         id: 0,
@@ -200,12 +198,8 @@ pub fn add_upgrade(
         passive_income_bonus,
         click_power_bonus,
         click_timer_bonus,
-        auto_click_rate,
         identifier,
         description,
     });
     Ok(())
 }
-
-
-
