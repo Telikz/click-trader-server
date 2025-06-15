@@ -25,7 +25,7 @@ pub struct UpdatePlayersSchedule {
 #[reducer]
 pub fn update_players(ctx: &ReducerContext, _args: UpdatePlayersSchedule) -> Result<(), String> {
     for mut player in ctx.db.player().iter() {
-        if player.online && player.passive_income > 0 {
+        if player.passive_income > 0 {
             player.money += u256::from(player.passive_income);
             ctx.db.player().identity().update(player);
         }
