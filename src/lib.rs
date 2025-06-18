@@ -1,6 +1,10 @@
 mod player_module;
 mod upgrades_module;
+mod stock_module;
+mod constants;
+
 use crate::player_module::{player, update_player_schedule, Player, UpdatePlayersSchedule};
+use crate::stock_module::{stock_market_schedule, StockMarketSchedule};
 use spacetimedb::sats::u256;
 use spacetimedb::{reducer, ReducerContext, Table, TimeDuration, Timestamp};
 
@@ -10,6 +14,10 @@ pub fn init(ctx: &ReducerContext) {
     let future_timestamp: Timestamp = ctx.timestamp + one_second;
 
     ctx.db.update_player_schedule().insert(UpdatePlayersSchedule {
+        id: 0,
+        scheduled_at: future_timestamp.into(),
+    });
+    ctx.db.stock_market_schedule().insert(StockMarketSchedule {
         id: 0,
         scheduled_at: future_timestamp.into(),
     });
@@ -25,11 +33,12 @@ pub fn identity_connected(ctx: &ReducerContext) {
             username: None,
             money: u256::new(0),
             passive_income: 0,
-            click_power: 1,
+            click_power: 1000,
             click_timer: 1_000_000, // microseconds (1s)
             last_click: ctx.timestamp,
             online: true,
             upgrades: Vec::new(),
+            stocks: Vec::new(),
         });
     } else if let Some(mut player) = ctx.db.player().identity().find(identity) {
         player.online = true;

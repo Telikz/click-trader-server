@@ -1,5 +1,11 @@
 use spacetimedb::sats::u256;
-use spacetimedb::{reducer, table, Identity, ReducerContext, ScheduleAt, Table, TimeDuration, Timestamp};
+use spacetimedb::{reducer, table, Identity, ReducerContext, ScheduleAt, SpacetimeType, Table, TimeDuration, Timestamp};
+
+#[derive(SpacetimeType)]
+pub struct StockType{
+    pub stock_id: u16,
+    pub amount: u64,
+}
 
 #[table(name = player, public)]
 pub struct Player {
@@ -8,10 +14,11 @@ pub struct Player {
     pub username: Option<String>,
     pub money: u256,
     pub passive_income: u128,
-    pub click_power: u64,
+    pub click_power: u128,
     pub click_timer: i64,
     pub online: bool,
     pub upgrades: Vec<u16>,
+    pub stocks: Vec<StockType>,
     pub last_click: Timestamp,
 }
 #[table(name = update_player_schedule, scheduled(update_players))]
