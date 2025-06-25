@@ -1,5 +1,7 @@
+use crate::constants::PLAYER_UPDATE_INTERVAL_MICROS;
 use spacetimedb::sats::u256;
 use spacetimedb::{reducer, table, Identity, ReducerContext, ScheduleAt, SpacetimeType, Table, TimeDuration, Timestamp};
+use std::time::Duration;
 
 #[derive(SpacetimeType)]
 pub struct StockType{
@@ -16,6 +18,8 @@ pub struct Player {
     pub passive_income: u128,
     pub click_power: u128,
     pub click_timer: i64,
+    pub stock_buy_fee: u16,
+    pub stock_sell_fee: u16,
     pub online: bool,
     pub upgrades: Vec<u16>,
     pub stocks: Vec<StockType>,
@@ -38,12 +42,9 @@ pub fn update_players(ctx: &ReducerContext, _args: UpdatePlayersSchedule) -> Res
         }
     }
 
-    let one_second = TimeDuration::from_micros(1_000_000);
-    let future_timestamp: Timestamp = ctx.timestamp + one_second;
-
     ctx.db.update_player_schedule().insert(UpdatePlayersSchedule {
         id: 0,
-        scheduled_at: future_timestamp.into(),
+        scheduled_at: (ctx.timestamp + Duration::from_micros(PLAYER_UPDATE_INTERVAL_MICROS)).into(),
     });
 
     Ok(())

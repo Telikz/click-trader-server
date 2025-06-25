@@ -1,4 +1,13 @@
-/// We use fixed-point arithmetic for prices to avoid floating-point issues
-/// while maintaining precision. A factor of 1_000 gives us 3 decimal places.
-/// E.g., a stored price of 12500 represents a display price of 12.500.
-pub(crate) const PRICE_SCALE_FACTOR: u128 = 1_000;
+use spacetimedb::sats::u256;
+
+pub const PLAYER_UPDATE_INTERVAL_MICROS: u64 = 1_000_000;
+pub const PLAYER_STARTING_MONEY: u256 = u256::new(0);
+pub const PLAYER_STARTING_PASSIVE_INCOME: u128 = 0;
+pub const PLAYER_STARTING_CLICK_POWER: u128 = 1000;
+pub const PLAYER_STARTING_CLICK_TIMER_MICROS: i64 = 1_000_000;
+pub const PLAYER_STARTING_STOCK_BUY_FEE: u16 = 200;
+pub const PLAYER_STARTING_STOCK_SELL_FEE: u16 = 300;
+
+pub const STOCK_UPDATE_INTERVAL_MICROS: u64 = 1_000_000;
+pub const PRICE_SCALE_FACTOR: u128 = 1_000;
+pub const DECIMAL_SCALE_FACTOR: u128 = 1_000;

@@ -1,25 +1,34 @@
-mod player_module;
-mod upgrades_module;
-mod stock_module;
 mod constants;
+mod player_module;
+mod stock_module;
+mod transaction_module;
+mod upgrades_module;
+mod initializer;
 
+use crate::constants::{
+    PLAYER_STARTING_CLICK_POWER, PLAYER_STARTING_CLICK_TIMER_MICROS, PLAYER_STARTING_MONEY,
+    PLAYER_STARTING_PASSIVE_INCOME, PLAYER_STARTING_STOCK_BUY_FEE, PLAYER_STARTING_STOCK_SELL_FEE,
+    PLAYER_UPDATE_INTERVAL_MICROS, STOCK_UPDATE_INTERVAL_MICROS,
+};
+use crate::initializer::initializer;
 use crate::player_module::{player, update_player_schedule, Player, UpdatePlayersSchedule};
 use crate::stock_module::{stock_market_schedule, StockMarketSchedule};
-use spacetimedb::sats::u256;
-use spacetimedb::{reducer, ReducerContext, Table, TimeDuration, Timestamp};
+use spacetimedb::{reducer, ReducerContext, Table};
+use std::time::Duration;
 
 #[reducer(init)]
 pub fn init(ctx: &ReducerContext) {
-    let one_second = TimeDuration::from_micros(1_000_000);
-    let future_timestamp: Timestamp = ctx.timestamp + one_second;
-
-    ctx.db.update_player_schedule().insert(UpdatePlayersSchedule {
-        id: 0,
-        scheduled_at: future_timestamp.into(),
-    });
+    initializer(ctx);
+    
+    ctx.db
+        .update_player_schedule()
+        .insert(UpdatePlayersSchedule {
+            id: 0,
+            scheduled_at: (ctx.timestamp + Duration::from_micros(PLAYER_UPDATE_INTERVAL_MICROS)).into(),
+        });
     ctx.db.stock_market_schedule().insert(StockMarketSchedule {
         id: 0,
-        scheduled_at: future_timestamp.into(),
+        scheduled_at: (ctx.timestamp + Duration::from_micros(STOCK_UPDATE_INTERVAL_MICROS)).into(),
     });
 }
 
@@ -31,14 +40,16 @@ pub fn identity_connected(ctx: &ReducerContext) {
         ctx.db.player().insert(Player {
             identity,
             username: None,
-            money: u256::new(0),
-            passive_income: 0,
-            click_power: 1000,
-            click_timer: 1_000_000, // microseconds (1s)
+            money: PLAYER_STARTING_MONEY,
+            passive_income: PLAYER_STARTING_PASSIVE_INCOME,
+            click_power: PLAYER_STARTING_CLICK_POWER,
+            click_timer: PLAYER_STARTING_CLICK_TIMER_MICROS,
+            stock_buy_fee: PLAYER_STARTING_STOCK_BUY_FEE,
+            stock_sell_fee: PLAYER_STARTING_STOCK_SELL_FEE,
             last_click: ctx.timestamp,
-            online: true,
             upgrades: Vec::new(),
             stocks: Vec::new(),
+            online: true,
         });
     } else if let Some(mut player) = ctx.db.player().identity().find(identity) {
         player.online = true;
@@ -51,7 +62,6 @@ pub fn identity_disconnected(ctx: &ReducerContext) {
     let identity = ctx.sender;
 
     if ctx.db.player().identity().find(identity).is_none() {
-        
     } else if let Some(mut player) = ctx.db.player().identity().find(identity) {
         player.online = false;
         ctx.db.player().identity().update(player);
