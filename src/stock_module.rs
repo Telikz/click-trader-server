@@ -97,21 +97,17 @@ pub fn update_stock_prices(ctx: &ReducerContext, _args: StockMarketSchedule) -> 
     for mut stock in ctx.db.stock().iter() {
         let buys = stock.recent_buys as i128;
         let sells = stock.recent_sells as i128;
-
         if buys == 0 && sells == 0 {
             continue;
         }
-
-        let net_demand = buys - sells;
-        let demand_units = net_demand / 100;
-
         let price = stock.price_per_share as i128;
         let sensitivity = config.sensitivity as i128;
+        let slippage = config.slippage_factor as i128;
         let scale = DECIMAL_SCALE_FACTOR as i128;
 
-        let delta = (price * demand_units * sensitivity) / scale;
-
-        let slippage = config.slippage_factor as i128;
+        let net_demand = buys - sells;
+        let demand_units = (net_demand * scale) / 100;
+        let delta = (price * demand_units * sensitivity) / (scale * scale);
         let adjusted_delta = (delta * (scale - slippage)) / scale;
 
         let new_price = (price + adjusted_delta).max(config.min_price as i128) as u128;

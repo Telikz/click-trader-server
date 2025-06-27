@@ -19,7 +19,7 @@ use std::time::Duration;
 #[reducer(init)]
 pub fn init(ctx: &ReducerContext) {
     initializer(ctx);
-    
+
     ctx.db
         .update_player_schedule()
         .insert(UpdatePlayersSchedule {

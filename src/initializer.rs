@@ -13,10 +13,10 @@ pub fn init_upgrades(ctx: &ReducerContext) {
         ctx,
         "passive_income_lv1".into(),
         "Passive Income I".into(),
-        "Gain +0.1 passive income/sec.".into(),
+        "Gain +0.2 passive income/sec.".into(),
         1,
-        1_000,
-        Some(100),
+        10_000,
+        Some(200),
         None,
         None,
     )
@@ -26,10 +26,23 @@ pub fn init_upgrades(ctx: &ReducerContext) {
         ctx,
         "passive_income_lv2".into(),
         "Passive Income II".into(),
-        "Gain +0.5 passive income/sec.".into(),
+        "Gain +1.0 passive income/sec.".into(),
         2,
-        5_000,
-        Some(500),
+        50_000,
+        Some(1_000),
+        None,
+        None,
+    )
+    .expect("Failed to add upgrade");
+
+    add_upgrade(
+        ctx,
+        "passive_income_lv3".into(),
+        "Passive Income III".into(),
+        "Gain +5.0 passive income/sec.".into(),
+        3,
+        300_000,
+        Some(5_000),
         None,
         None,
     )
@@ -39,11 +52,37 @@ pub fn init_upgrades(ctx: &ReducerContext) {
         ctx,
         "click_power_lv1".into(),
         "Click Power I".into(),
-        "Increase click power by 1.".into(),
+        "Increase click power by 2.".into(),
         1,
-        2_000,
+        20_000,
         None,
-        Some(1),
+        Some(2),
+        None,
+    )
+    .expect("Failed to add upgrade");
+
+    add_upgrade(
+        ctx,
+        "click_power_lv2".into(),
+        "Click Power II".into(),
+        "Increase click power by 5.".into(),
+        2,
+        100_000,
+        None,
+        Some(5),
+        None,
+    )
+    .expect("Failed to add upgrade");
+
+    add_upgrade(
+        ctx,
+        "click_power_lv3".into(),
+        "Click Power III".into(),
+        "Increase click power by 10.".into(),
+        3,
+        500_000,
+        None,
+        Some(10),
         None,
     )
     .expect("Failed to add upgrade");
@@ -52,12 +91,25 @@ pub fn init_upgrades(ctx: &ReducerContext) {
         ctx,
         "faster_clicks".into(),
         "Faster Clicks".into(),
-        "Reduce click timer by 200ms.".into(),
+        "Reduce click timer by 100 ms.".into(),
         1,
-        3_000,
+        30_000,
         None,
         None,
-        Some(200_000), // microseconds
+        Some(100_000),
+    )
+    .expect("Failed to add upgrade");
+
+    add_upgrade(
+        ctx,
+        "turbo_clicks".into(),
+        "Turbo Clicks".into(),
+        "Reduce click timer by 500 ms.".into(),
+        1,
+        200_000,
+        None,
+        None,
+        Some(500_000),
     )
     .expect("Failed to add upgrade");
 }
@@ -65,37 +117,55 @@ pub fn init_upgrades(ctx: &ReducerContext) {
 pub fn init_stocks(ctx: &ReducerContext) {
     create_stock(
         ctx,
-        "Banana Corp".into(),
-        "Leading exporter of potassium-based optimism.".into(),
+        "QuantumCompute".into(),
+        "Next-gen quantum processors at scale.".into(),
+        100,
+        1_000_000_000_000_000,
+    )
+    .expect("Failed to create QuantumCompute");
+
+    create_stock(
+        ctx,
+        "EtherFiber".into(),
+        "Distributed broadband over blockchain.".into(),
+        50,
+        500_000_000_000_000,
+    )
+    .expect("Failed to create EtherFiber");
+
+    create_stock(
+        ctx,
+        "MarsVacations".into(),
+        "Luxury travel packages to Mars colonies.".into(),
+        20,
+        2_000_000_000_000_000,
+    )
+    .expect("Failed to create MarsVacations");
+
+    create_stock(
+        ctx,
+        "CaffeineInc".into(),
+        "Instant power-nap coffee crystals.".into(),
         1,
-        1_000_000,
+        5_000_000_000_000_000,
     )
-    .expect("Failed to create Banana Corp");
+    .expect("Failed to create CaffeineInc");
 
     create_stock(
         ctx,
-        "ByteMiner".into(),
-        "Blockchain infrastructure for frogs.".into(),
-        5, // 5.000 price
-        500_000,
-    )
-    .expect("Failed to create ByteMiner");
-
-    create_stock(
-        ctx,
-        "SkyRockets".into(),
-        "Aerospace dreams, Earthly debt.".into(),
+        "RoboFarm".into(),
+        "Autonomous farming robots and AI-driven yields.".into(),
         10,
-        1_000_000_000,
+        750_000_000_000_000,
     )
-    .expect("Failed to create SkyRockets");
+    .expect("Failed to create RoboFarm");
 
     create_stock(
         ctx,
-        "SleepyCoffee".into(),
-        "The only coffee that makes you nap faster.".into(),
-        2,
-        100_000,
+        "GenAILabs".into(),
+        "Cutting-edge generative AI research co-op.".into(),
+        250,
+        100_000_000_000_000,
     )
-    .expect("Failed to create SleepyCoffee");
+    .expect("Failed to create GenAILabs");
 }
