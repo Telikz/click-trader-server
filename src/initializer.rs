@@ -121,6 +121,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Next-gen quantum processors at scale.".into(),
         100,
         1_000_000_000_000_000,
+        50
     )
     .expect("Failed to create QuantumCompute");
 
@@ -130,6 +131,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Distributed broadband over blockchain.".into(),
         50,
         500_000_000_000_000,
+        50
     )
     .expect("Failed to create EtherFiber");
 
@@ -139,6 +141,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Luxury travel packages to Mars colonies.".into(),
         20,
         2_000_000_000_000_000,
+        50
     )
     .expect("Failed to create MarsVacations");
 
@@ -148,6 +151,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Instant power-nap coffee crystals.".into(),
         1,
         5_000_000_000_000_000,
+        50
     )
     .expect("Failed to create CaffeineInc");
 
@@ -157,6 +161,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Autonomous farming robots and AI-driven yields.".into(),
         10,
         750_000_000_000_000,
+        50
     )
     .expect("Failed to create RoboFarm");
 
@@ -166,6 +171,7 @@ pub fn init_stocks(ctx: &ReducerContext) {
         "Cutting-edge generative AI research co-op.".into(),
         250,
         100_000_000_000_000,
+        50
     )
     .expect("Failed to create GenAILabs");
 }

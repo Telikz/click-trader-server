@@ -1,6 +1,7 @@
 use crate::constants::PRICE_SCALE_FACTOR;
 use crate::constants::{DECIMAL_SCALE_FACTOR, STOCK_UPDATE_INTERVAL_MICROS};
 use crate::transaction_module::update_transactions;
+use rand::Rng;
 use spacetimedb::{reducer, table, ReducerContext, ScheduleAt, Table};
 use std::time::Duration;
 
@@ -18,6 +19,7 @@ pub struct Stock {
     pub last_price: u128,
     pub recent_buys: u64,
     pub recent_sells: u64,
+    pub volatility: u64,
 }
 
 #[table(name = stock_market_schedule, scheduled(update_stock_prices))]
@@ -58,6 +60,7 @@ pub fn create_stock(
     description: String,
     initial_price: u128,
     total_shares: u64,
+    volatility: u64,
 ) -> Result<(), String> {
     if total_shares == 0 {
         return Err("Total shares cannot be zero.".to_string());
@@ -77,6 +80,7 @@ pub fn create_stock(
         last_price: price_per_share,
         recent_buys: 0,
         recent_sells: 0,
+        volatility,
     });
     Ok(())
 }
@@ -94,23 +98,35 @@ pub fn update_stock_prices(ctx: &ReducerContext, _args: StockMarketSchedule) -> 
         log::error!("Could not process transactions during market update: {}", e);
     }
 
+    let mut rng = ctx.rng();
+
     for mut stock in ctx.db.stock().iter() {
-        let buys = stock.recent_buys as i128;
-        let sells = stock.recent_sells as i128;
-        if buys == 0 && sells == 0 {
-            continue;
-        }
         let price = stock.price_per_share as i128;
-        let sensitivity = config.sensitivity as i128;
-        let slippage = config.slippage_factor as i128;
         let scale = DECIMAL_SCALE_FACTOR as i128;
 
-        let net_demand = buys - sells;
-        let demand_units = (net_demand * scale) / 100;
-        let delta = (price * demand_units * sensitivity) / (scale * scale);
-        let adjusted_delta = (delta * (scale - slippage)) / scale;
+        let net_demand = stock.recent_buys as i128 - stock.recent_sells as i128;
+        let demand_units = net_demand;
 
-        let new_price = (price + adjusted_delta).max(config.min_price as i128) as u128;
+        let capped_units = demand_units.clamp(-100, 100);
+        
+        let sensitivity = config.sensitivity as i128;
+        let slippage = config.slippage_factor as i128;
+
+        let raw_trade_delta = (price * capped_units * sensitivity) / (scale * scale);
+        let adjusted_trade_delta = (raw_trade_delta * (scale - slippage)) / scale;
+
+        let volatility = stock.volatility as i128;
+        let raw_volatility = (price * volatility) / (scale * 100);
+        let volatility_range = if volatility > 0 {
+            raw_volatility.max(1)
+        } else {
+            0
+        };
+        let volatility_delta = rng.gen_range(-volatility_range..=volatility_range);
+
+        let new_price = (price + adjusted_trade_delta + volatility_delta)
+            .max(config.min_price as i128)
+            .max(1) as u128;
 
         stock.last_price = stock.price_per_share;
         stock.price_per_share = new_price;
